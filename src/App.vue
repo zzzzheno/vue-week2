@@ -2,17 +2,23 @@
 import { ref } from 'vue'
 import axios from 'axios'
 
-const tem = ref('signIn')
+// 登入的模板
+const tem = ref('signInTem')
+// 登入的模板
+
+// 註冊
+const register = () => {}
+// 註冊
 </script>
 
 <template>
   <div class="container d-flex justify-content-center py-5">
     <div class="row p-5 todoList" style="width: 500px">
       <div class="col-12">
-        <h1 class="text-center fw-bold py-4">Todo List</h1>
+        <h1 class="text-center fw-bold py-2">Todo List</h1>
       </div>
       <!-- 登入 開始 -->
-      <div class="col-12 py-5" v-if="tem === 'signIn'">
+      <div class="col-12 py-2" v-if="tem === 'signInTem'">
         <h3 class="text-center fw-bold py-3">登入</h3>
         <form>
           <div class="d-flex flex-column mb-4">
@@ -24,7 +30,14 @@ const tem = ref('signIn')
             <input type="password" id="singInPassword" placeholder="請輸入密碼" />
           </div>
           <div class="d-flex">
-            <button class="me-3 thirdButton" type="button">註冊</button>
+            <button
+              class="me-3 thirdButton"
+              type="button"
+              :class="{ active: tem === 'registerTem' }"
+              @click="tem = 'registerTem'"
+            >
+              註冊
+            </button>
             <button class="flex-grow-1 mainButton" type="button">登入</button>
           </div>
         </form>
@@ -32,7 +45,7 @@ const tem = ref('signIn')
       <!-- 登入 結束 -->
 
       <!-- 註冊 開始 -->
-      <div class="col-12 py-5" v-else-if="tem === 'register'">
+      <div class="col-12 py-2" v-else-if="tem === 'registerTem'">
         <h3 class="text-center fw-bold py-3">註冊</h3>
         <form>
           <div class="d-flex flex-column mb-4">
@@ -48,8 +61,15 @@ const tem = ref('signIn')
             <input type="text" id="registerNickName" placeholder="請輸入暱稱" />
           </div>
           <div class="d-flex">
-            <button class="me-3 thirdButton" type="button">返回登入</button>
-            <button class="flex-grow-1 mainButton" type="button">確定註冊</button>
+            <button
+              class="me-3 thirdButton"
+              type="button"
+              :class="{ active: tem === 'signInTem' }"
+              @click="tem = 'signInTem'"
+            >
+              返回登入
+            </button>
+            <button class="flex-grow-1 mainButton" type="button" @click="register">確定註冊</button>
           </div>
         </form>
       </div>
@@ -57,6 +77,7 @@ const tem = ref('signIn')
     </div>
   </div>
 </template>
+
 <style scoped>
 body {
   letter-spacing: 0.1rem;
