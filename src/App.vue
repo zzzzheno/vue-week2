@@ -1,14 +1,98 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import axios from 'axios'
+
+const site = 'https://todolist-api.hexschool.io'
 
 // 登入的模板
 const tem = ref('signInTem')
 // 登入的模板
 
-// 註冊
-const register = () => {}
-// 註冊
+const email = ref('')
+const password = ref('')
+const nickName = ref('')
+const message = ref('')
+const token = ref('')
+
+// 登入
+const signIn = async () => {
+  try {
+    const response = await axios.post(`${site}/users/sign_in`, {
+      email: email.value,
+      password: password.value
+    })
+    token.value = response.data.token
+    localStorage.setItem('token', token.value)
+    tem.value = 'todoTem'
+  } catch (error) {
+    alert((message.value = error.response.data.message))
+  }
+}
+// 登入 結束
+
+// 驗證 開始
+const tokenCheck = ref('')
+
+const checkToken = async () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  document.cookie = `todoList=${tokenCheck.value}; expires=${tomorrow.toUTCString()}`
+  try {
+    const response = await axios.get(`${site}/users/checkout`, {
+      headers: {
+        Authorization: tokenCheck.value
+      }
+    })
+    token.value = tokenCheck.value
+    tem.value = 'todoTem'
+  } catch (error) {
+    message.value = '驗證失敗'
+  }
+}
+// 驗證 結束
+
+onMounted(() => {
+  checkToken()
+})
+
+// 註冊 開始
+// todo:補上欄位驗證
+const register = async () => {
+  try {
+    const response = await axios.post(`${site}/users/sign_up`, {
+      email: email.value,
+      password: password.value,
+      nickname: nickName.value
+    })
+    alert((message.value = `${nickName.value}註冊成功！請返回登入頁登入`))
+  } catch (error) {
+    alert((message.value = 'oops!' + error.response.data.message))
+  }
+  ;(email.value = ''), (password.value = ''), (nickName.value = '')
+}
+// 註冊 結束
+
+// 登出 開始
+const signOut = async () => {
+  try {
+    const response = await axios.post(
+      `${site}/users/sign_out`,
+      {},
+      {
+        headers: {
+          Authorization: token.value
+        }
+      }
+    )
+    localStorage.removeItem('token')
+    token.value = ''
+    tem.value = 'signInTem'
+    alert((message.value = '登出成功'))
+  } catch (error) {
+    alert((message.value = '登出失敗'))
+  }
+}
+// 登出 結束
 </script>
 
 <template>
@@ -23,11 +107,16 @@ const register = () => {}
         <form>
           <div class="d-flex flex-column mb-4">
             <label class="mb-1 fw-bold" for="signInAccount">帳號</label>
-            <input type="email" id="signInAccount" placeholder="請輸入帳號" />
+            <input type="email" id="signInAccount" placeholder="請輸入帳號" v-model="email" />
           </div>
           <div class="d-flex flex-column mb-5">
             <label class="mb-1 fw-bold" for="signInPassword">密碼</label>
-            <input type="password" id="singInPassword" placeholder="請輸入密碼" />
+            <input
+              type="password"
+              id="singInPassword"
+              placeholder="請輸入密碼"
+              v-model="password"
+            />
           </div>
           <div class="d-flex">
             <button
@@ -38,7 +127,7 @@ const register = () => {}
             >
               註冊
             </button>
-            <button class="flex-grow-1 mainButton" type="button">登入</button>
+            <button class="flex-grow-1 mainButton" type="button" @click="signIn">登入</button>
           </div>
         </form>
       </div>
@@ -50,15 +139,20 @@ const register = () => {}
         <form>
           <div class="d-flex flex-column mb-4">
             <label class="mb-1 fw-bold" for="registerAccount">帳號</label>
-            <input type="email" id="registerAccount" placeholder="請輸入帳號" />
+            <input type="email" id="registerAccount" placeholder="請輸入帳號" v-model="email" />
           </div>
           <div class="d-flex flex-column mb-4">
             <label class="mb-1 fw-bold" for="registerPassword">密碼</label>
-            <input type="password" id="registerPassword" placeholder="請輸入密碼" />
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="請輸入密碼"
+              v-model="password"
+            />
           </div>
           <div class="d-flex flex-column mb-5">
             <label class="mb-1 fw-bold" for="registerNickName">暱稱</label>
-            <input type="text" id="registerNickName" placeholder="請輸入暱稱" />
+            <input type="text" id="registerNickName" placeholder="請輸入暱稱" v-model="nickName" />
           </div>
           <div class="d-flex">
             <button
@@ -74,6 +168,13 @@ const register = () => {}
         </form>
       </div>
       <!-- 註冊 結束 -->
+
+      <!-- Todo頁 開始 -->
+      <div class="col-12 py-2" v-else-if="tem === 'todoTem'">
+        <h3 class="text-center fw-bold py-3">Todo 頁</h3>
+        <button type="button" class="thirdButton" @click="signOut">登出</button>
+      </div>
+      <!-- Todo頁 結束 -->
     </div>
   </div>
 </template>
